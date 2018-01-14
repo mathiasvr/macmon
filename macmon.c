@@ -41,7 +41,7 @@ void packet_handler(u_char *param, const struct pcap_pkthdr *pkt_hdr, const u_ch
 
     // verify frame check sequence (FCS),
     // frames without FCS will be discarded as well
-    if (!check_fcs(pkt, len - 4)) {
+    if (!check_fcs(pkt, len)) {
         // fprintf(stderr, "Incorrect FCS\n");
         return;
     }
