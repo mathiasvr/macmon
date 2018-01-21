@@ -7,6 +7,7 @@
  */
 
 #include <pcap.h>
+#include <stdint.h>
 
 #include "crc32.h"
 #include "proto.h"
@@ -16,7 +17,7 @@ void packet_handler(u_char *param, const struct pcap_pkthdr *pkt_hdr, const u_ch
     // unused parameters
     (void)(param);
 
-    u_int len = pkt_hdr->caplen;
+    uint32_t len = pkt_hdr->caplen;
 
     struct ieee80211_radiotap_header *radiotap;
     struct ieee80211_header *wlan;
@@ -47,7 +48,7 @@ void packet_handler(u_char *param, const struct pcap_pkthdr *pkt_hdr, const u_ch
     }
 
     // source address
-    u_char *sa;
+    uint8_t *sa;
 
     switch (FC_DS_STATUS(wlan)) {
         case ADHOC: sa = wlan->addr2; break;
@@ -62,6 +63,7 @@ void packet_handler(u_char *param, const struct pcap_pkthdr *pkt_hdr, const u_ch
     // printf(" -> ");
     // printf("%02X:%02X:%02X:%02X:%02X:%02X", da[0], da[1], da[2], da[3], da[4], da[5]);
     printf("\n");
+    fflush(stdout);
 }
 
 int install_data_frame_filter(pcap_t *handle) {
@@ -138,8 +140,6 @@ int main(int argc, char *argv[]) {
         // NOTE: pcap_perror seems to provide less readable errors
         // pcap_perror(ad_handle, "Unable to start the capture");
         fprintf(stderr, "Unable to start the capture: %s\n", pcap_statustostr(status));
-        printf("\n");
-        print_adapter_list();
         return 1;
     }
 

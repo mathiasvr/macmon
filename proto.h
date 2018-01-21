@@ -2,21 +2,21 @@
 #define _PROTO_H
 
 struct ieee80211_radiotap_header {
-    u_int8_t version;  // set to 0
-    u_int8_t pad;
-    u_int16_t length;   // entire length
-    u_int32_t present;  // fields present
+    uint8_t version;  // set to 0
+    uint8_t pad;
+    uint16_t length;   // entire length
+    uint32_t present;  // fields present
 } __attribute__((__packed__));
 
 // TODO: currently for data frames (not control and management)
 struct ieee80211_header {
-    u_int16_t fc;  // frame control
-    u_int16_t duration;
+    uint16_t fc;  // frame control
+    uint16_t duration;
     // depending on fc flags
-    u_int8_t addr1[6];
-    u_int8_t addr2[6];
-    u_int8_t addr3[6];
-    u_int16_t seq_ctrl;  // sequence number & fragment number
+    uint8_t addr1[6];
+    uint8_t addr2[6];
+    uint8_t addr3[6];
+    uint16_t seq_ctrl;  // sequence number & fragment number
 } __attribute__((__packed__));
 
 // frame types
