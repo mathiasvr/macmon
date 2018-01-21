@@ -20,9 +20,19 @@ struct ieee80211_header {
 } __attribute__((__packed__));
 
 // frame types
-#define MGMT_FRAME 0x00     // management
-#define CONTROL_FRAME 0x01  // control
-#define DATA_FRAME 0x02     // data
+enum FRAME_TYPE {
+    MANAGEMENT_FRAME = 0,
+    CONTROL_FRAME = 1,
+    DATA_FRAME = 2
+};
+
+// distribution system (DS) status
+enum DS_STATUS {
+    ADHOC = 0,
+    TO_DS = 1,
+    FROM_DS = 2,
+    WDS = 3
+};
 
 // extract values from the frame control field
 #define FC_TYPE(x) ((x->fc >> 2) & 0x03)
@@ -31,10 +41,5 @@ struct ieee80211_header {
 #define FC_FROM_DS(x) (x->fc & 0x0200)
 
 #define FC_DS_STATUS(x) ((x->fc >> 8) & 0x03)
-
-#define ADHOC 0x00
-#define TO_DS 0x01
-#define FROM_DS 0x02
-#define WDS 0x03
 
 #endif /* _PROTO_H */
