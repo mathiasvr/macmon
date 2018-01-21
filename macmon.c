@@ -3,7 +3,7 @@
  *
  * Outputs source MAC addresses for all captured WLAN data packets
  * 
- * Compile: gcc -std=c99 -O3 -lpcap macmon.c   
+ * Compile: gcc -O3 macmon.c -lpcap
  */
 
 #include <pcap.h>
@@ -119,30 +119,31 @@ int main(int argc, char *argv[]) {
     char *dev_name = argv[1];
     char err_buf[PCAP_ERRBUF_SIZE];
 
+    // create capture handle for the adapter
     pcap_t *ad_handle = pcap_create(dev_name, err_buf);
     if (ad_handle == NULL) {
         fprintf(stderr, "Unable to open the adapter '%s': %s\n", dev_name, err_buf);
         return 1;
     }
 
-    if (pcap_set_rfmon(ad_handle, 1) == PCAP_ERROR_ACTIVATED) {
-        fprintf(stderr, "Unable to put the adapter '%s' into monitor mode!\n", dev_name);
-        // return 1;
-    }
-
+    // set options for a capture handle that has not been activated
+    pcap_set_rfmon(ad_handle, 1);       // set monitor mode to enabled
     pcap_set_snaplen(ad_handle, 2048);  // set snapshot length in bytes (65536 is whole)
     pcap_set_timeout(ad_handle, 512);   // set timeout in milliseconds (tcpdump uses 1000)
     // pcap_set_promisc(ad_handle, 0);  // turn promiscuous mode off
 
-    // open the adapter
-    if (pcap_activate(ad_handle) != 0) {
-        pcap_perror(ad_handle, "Unable to start the capture");
+    // start packet capture
+    int status = pcap_activate(ad_handle);
+    if (status != 0) {
+        // NOTE: pcap_perror seems to provide less readable errors
+        // pcap_perror(ad_handle, "Unable to start the capture");
+        fprintf(stderr, "Unable to start the capture: %s\n", pcap_statustostr(status));
         printf("\n");
         print_adapter_list();
         return 1;
     }
 
-    // TODO: it's probably not even possible to get here if not in monitor mode.
+    // TODO: it's probably not even possible to get here if not already in monitor mode.
     // check link layer
     if (pcap_datalink(ad_handle) != DLT_IEEE802_11_RADIO) {
         if (pcap_datalink(ad_handle) == DLT_EN10MB) {
@@ -161,7 +162,7 @@ int main(int argc, char *argv[]) {
 
     // printf("Scanning incomming packets on %s (Ctrl+C to exit)\n\n", dev_name);
 
-    // start capture
+    // attach packet handler to begin processing packets
     if (pcap_loop(ad_handle, 0, packet_handler, 0) == -1) {
         pcap_perror(ad_handle, "An error ocurred during capture");
     }
