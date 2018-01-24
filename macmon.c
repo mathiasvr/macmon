@@ -17,6 +17,7 @@ void packet_handler(u_char *param, const struct pcap_pkthdr *pkt_hdr, const u_ch
     // unused parameters
     (void)(param);
 
+    // captured length of the packet
     uint32_t len = pkt_hdr->caplen;
 
     struct ieee80211_radiotap_header *radiotap;
@@ -40,8 +41,7 @@ void packet_handler(u_char *param, const struct pcap_pkthdr *pkt_hdr, const u_ch
     // only consider data frames (already checked by bpf filter)
     // if(FC_TYPE(wlan) != DATA_FRAME) return;
 
-    // verify frame check sequence (FCS),
-    // frames without FCS will be discarded as well
+    // ignore packets with incorrect frame check sequence (FCS)
     if (!check_fcs(pkt, len)) {
         // fprintf(stderr, "Incorrect FCS\n");
         return;
@@ -58,6 +58,10 @@ void packet_handler(u_char *param, const struct pcap_pkthdr *pkt_hdr, const u_ch
         default:
             return;
     }
+
+    // prepend unix timestamp (with decimals)
+    double ts = pkt_hdr->ts.tv_sec + pkt_hdr->ts.tv_usec/1000000.0;
+    printf("%f ", ts);
 
     printf("%02X:%02X:%02X:%02X:%02X:%02X", sa[0], sa[1], sa[2], sa[3], sa[4], sa[5]);
     // printf(" -> ");
