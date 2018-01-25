@@ -174,3 +174,33 @@ int main(int argc, char *argv[]) {
     pcap_close(ad_handle);
     return 0;
 }
+
+// read capture from pcap file
+int main_from_file(int argc, char *argv[]) {
+    if (argc < 2) {
+        printf("Usage: macmon <pcap file name>\n");
+        return 1;
+    }
+
+    char *file_name = argv[1];
+    char errbuf[PCAP_ERRBUF_SIZE];
+
+    pcap_t *ad_handle = pcap_open_offline(file_name, errbuf);
+    if (ad_handle == NULL) {
+        fprintf(stderr, "Unable to open capture file: %s\n", errbuf);
+        return 1;
+    }
+
+    // only capture wlan data frames
+    if (install_data_frame_filter(ad_handle) != 0) {
+        fprintf(stderr, "Could not install capture filter: %s\n", pcap_geterr(ad_handle));
+        return 1;
+    }
+
+    // attach packet handler to begin processing packets
+    if (pcap_loop(ad_handle, 0, packet_handler, 0) == -1) {
+        pcap_perror(ad_handle, "An error ocurred during capture");
+    }
+
+    return 0;
+}
