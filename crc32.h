@@ -3,6 +3,8 @@
  *
  *  Based on code from http://www.w3.org/TR/PNG/#D-CRCAppendix
  */
+#ifndef _CRC32_H
+#define _CRC32_H
 
 #include <stdint.h>
 
@@ -38,3 +40,5 @@ static uint32_t crc32(const uint8_t *buf, int len) {
 static int check_fcs(const uint8_t *buf, int len) {
     return crc32(buf, len - 4) == *(uint32_t *)(buf + len - 4);
 }
+
+#endif /* _CRC32_H */
