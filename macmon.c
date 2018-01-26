@@ -47,23 +47,37 @@ void packet_handler(u_char *param, const struct pcap_pkthdr *pkt_hdr, const u_ch
         return;
     }
 
-    // source address
-    uint8_t *sa;
+    // source address, bssid
+    uint8_t *sa, *bs;
 
     switch (FC_DS_STATUS(wlan)) {
-        case ADHOC: sa = wlan->addr2; break;
-        case TO_DS: sa = wlan->addr2; break;
-        case FROM_DS: sa = wlan->addr3; break;
+        case ADHOC:
+            sa = wlan->addr2;
+            bs = wlan->addr3;
+            break;
+        case TO_DS:
+            sa = wlan->addr2;
+            bs = wlan->addr1;
+            break;
+        case FROM_DS:
+            sa = wlan->addr3;
+            bs = wlan->addr2;
+            break;
+
+        // case ADHOC: sa = wlan->addr2; break;
+        // case TO_DS: sa = wlan->addr2; break;
+        // case FROM_DS: sa = wlan->addr3; break;
         case WDS:  // TODO: ignore wds?
         default:
             return;
     }
 
     // prepend unix timestamp (with decimals)
-    double ts = pkt_hdr->ts.tv_sec + pkt_hdr->ts.tv_usec/1000000.0;
+    double ts = pkt_hdr->ts.tv_sec + pkt_hdr->ts.tv_usec / 1000000.0;
     printf("%f ", ts);
 
-    printf("%02X:%02X:%02X:%02X:%02X:%02X", sa[0], sa[1], sa[2], sa[3], sa[4], sa[5]);
+    printf("%02X:%02X:%02X:%02X:%02X:%02X ", sa[0], sa[1], sa[2], sa[3], sa[4], sa[5]);
+    printf("%02X:%02X:%02X:%02X:%02X:%02X", bs[0], bs[1], bs[2], bs[3], bs[4], bs[5]);
     // printf(" -> ");
     // printf("%02X:%02X:%02X:%02X:%02X:%02X", da[0], da[1], da[2], da[3], da[4], da[5]);
     printf("\n");
